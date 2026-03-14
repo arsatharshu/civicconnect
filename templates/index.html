@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicConnect – Smart Community Support System</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+ 
+</style>
+</head>
+<body>
+
+<div class="blob1"></div><div class="blob2"></div>
+<div id="notification"><div class="nt" id="notif-title"></div><div class="nm" id="notif-msg"></div></div>
+<div id="toast"></div>
+
+<!-- REGISTRATION SUCCESS MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-emoji">🎉</div>
+    <h2>Registration Successful!</h2>
+    <p>Your Citizen ID has been generated. Please save it — you'll need it to login.</p>
+    <div class="cid-display" id="modal-id">CC10245</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="copyID()">📋 Copy ID</button>
+      <button class="btn btn-primary" onclick="goToLogin()">Go to Login →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-emoji">⚠️</div>
+    <h2 style="font-size:1.1rem">Are you sure?</h2>
+    <p id="confirm-msg">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="confirmNo()">✕ Cancel</button>
+      <button class="btn btn-primary" onclick="confirmYes()">🗑️ Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LANDING ═══ -->
+<div id="page-landing" class="page active">
+  <div class="hero-nav">
+    <div class="nav-brand">🏛️ CivicConnect</div>
+    <div class="hero-nav-btns">
+      <button class="btn btn-secondary btn-sm" onclick="showPage('page-login')">Login</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('page-register')">Register</button>
+      <button class="btn btn-secondary btn-sm" onclick="showPage('page-admin-login')">⚙️ Admin</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-tag">✨ Smart Community Support System</div>
+    <h1>Connect. Report.<br><span>Build Together.</span></h1>
+    <p>CivicConnect bridges citizens, farmers, NGOs, and administrators in one powerful digital platform for a smarter community.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="showPage('page-register')">🚀 Get Started Free</button>
+      <button class="btn btn-secondary" onclick="showPage('page-login')">🔐 Citizen Login</button>
+      <button class="btn btn-secondary" onclick="showPage('page-admin-login')">⚙️ Admin Panel</button>
+    </div>
+    <div class="hero-chips">
+      <div class="chip">🏙️ Civic Issue Reporting</div>
+      <div class="chip">🍲 Food Donation Portal</div>
+      <div class="chip">🌾 Farmer Direct Market</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div id="page-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-head"><div style="font-size:2rem;margin-bottom:10px">🏛️</div><h1>Create Account</h1><p>Join CivicConnect and make your community better</p></div>
+      <div class="form-group"><label>👤 Full Name</label><input type="text" id="reg-name" placeholder="Enter your full name"></div>
+      <div class="form-group"><label>📱 Mobile Number</label><input type="tel" id="reg-mobile" placeholder="Enter your 10-digit mobile number"></div>
+      <button class="btn btn-primary btn-full" onclick="register()">✨ Create My Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="showPage('page-login')">Login here</a></div>
+      <div class="auth-switch"><a onclick="showPage('page-landing')">← Back to Home</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="page-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-head"><div style="font-size:2rem;margin-bottom:10px">🔐</div><h1>Welcome Back</h1><p>Login with your Citizen ID and mobile number</p></div>
+      <div class="form-group"><label>🆔 Citizen ID</label><input type="text" id="login-id" placeholder="e.g. CC10245" style="font-family:'Space Mono',monospace;letter-spacing:2px"></div>
+      <div class="form-group"><label>📱 Mobile Number</label><input type="tel" id="login-mobile" placeholder="Enter your mobile number"></div>
+      <button class="btn btn-primary btn-full" onclick="login()">→ Login to Dashboard</button>
+      <div class="auth-switch">New here? <a onclick="showPage('page-register')">Create an account</a></div>
+      <div class="auth-switch"><a onclick="showPage('page-landing')">← Back to Home</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN ═══ -->
+<div id="page-admin-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-head"><div style="font-size:2rem;margin-bottom:10px">⚙️</div><h1>Admin Login</h1><p>Restricted access — administrators only</p></div>
+      <div style="background:var(--red-light);border:1.5px solid var(--red-mid);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:0.8rem;color:var(--red);font-weight:600;">
+        🔑 Username: <b>admin</b> &nbsp;·&nbsp; Password: <b>admin123</b>
+      </div>
+      <div class="form-group"><label>👤 Username</label><input type="text" id="admin-uname" placeholder="Enter admin username"></div>
+      <div class="form-group"><label>🔑 Password</label><input type="password" id="admin-pwd" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+      <button class="btn btn-primary btn-full" onclick="adminLogin()">⚙️ Access Admin Panel</button>
+      <div class="auth-switch"><a onclick="showPage('page-landing')">← Back to Home</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="page-dashboard" class="page">
+  <nav>
+    <div class="nav-brand">🏛️ CivicConnect</div>
+    <div class="nav-user"><div class="nav-cid" id="nav-cid">--</div><button class="btn-nav" onclick="logout()">Logout</button></div>
+  </nav>
+  <div class="container">
+    <div class="dash-head">
+      <div class="dash-welcome">👋 Welcome Back</div>
+      <h1 id="dash-name">Hello, Citizen!</h1>
+      <p>What would you like to do today?</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card civic" onclick="showPage('page-civic')"><span class="service-icon">🏙️</span><h3>Report Civic Issues</h3><p>Report road damage, broken streetlights, garbage overflow, water leakage and more to local authorities.</p><div class="service-arrow">Report Now →</div></div>
+      <div class="service-card food" onclick="showPage('page-food')"><span class="service-icon">🍲</span><h3>Food Donation</h3><p>Donate surplus food or connect NGOs and volunteers to distribute food to those in need.</p><div class="service-arrow">Donate Now →</div></div>
+      <div class="service-card farmer" onclick="showPage('page-farmer')"><span class="service-icon">🌾</span><h3>Farmer Market</h3><p>Browse fresh produce directly from farmers or list your products to reach customers.</p><div class="service-arrow">Explore Market →</div></div>
+    </div>
+    <div class="section-title">📋 My Recent Complaints</div>
+    <div id="dash-complaints"><div class="empty-state"><div class="ei">📭</div><p>No complaints yet. Report an issue to get started!</p></div></div>
+  </div>
+  <div class="bottom-nav"><div class="bottom-nav-inner">
+    <button class="bn-item active" onclick="showPage('page-dashboard')"><span>🏠</span>Home</button>
+    <button class="bn-item" onclick="showPage('page-civic')"><span>🏙️</span>Civic</button>
+    <button class="bn-item" onclick="showPage('page-food')"><span>🍲</span>Food</button>
+    <button class="bn-item" onclick="showPage('page-farmer')"><span>🌾</span>Market</button>
+  </div></div>
+</div>
+
+<!-- ═══ CIVIC ═══ -->
+<div id="page-civic" class="page">
+  <nav><div class="nav-brand">🏛️ CivicConnect</div><div class="nav-user"><div class="nav-cid" id="cid2"></div><button class="btn-nav" onclick="showPage('page-dashboard')">← Dashboard</button></div></nav>
+  <div class="container">
+    <div class="subpage-head"><button class="back-btn" onclick="showPage('page-dashboard')">←</button><div class="subpage-title"><h2>🏙️ Report Civic Issues</h2><p>Submit your complaint and track its progress</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="section-title">📝 New Complaint</div>
+        <div class="card">
+          <div class="form-group"><label>📝 Issue Title</label><input type="text" id="civic-title" placeholder="e.g. Broken streetlight on Main Road"></div>
+          <div class="form-group"><label>🏷️ Category</label>
+            <select id="civic-cat">
+              <option value="🚧 Road Damage">🚧 Road Damage</option>
+              <option value="💡 Broken Streetlight">💡 Broken Streetlight</option>
+              <option value="🗑️ Garbage Overflow">🗑️ Garbage Overflow</option>
+              <option value="💧 Water Leakage">💧 Water Leakage</option>
+              <option value="🚰 Drainage Issues">🚰 Drainage Issues</option>
+              <option value="🏗️ Other">🏗️ Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>📄 Description</label><textarea id="civic-desc" placeholder="Describe the issue in detail..."></textarea></div>
+          <div class="form-group"><label>📍 Location</label><div class="loc-wrap"><input type="text" id="civic-loc" placeholder="Your location"><button class="loc-btn" onclick="captureGPS('civic-loc',this)">📍 Capture GPS</button></div></div>
+          <div class="form-group"><label>📷 Issue Photo</label>
+            <div class="upload-area" onclick="document.getElementById('civic-img').click()">
+              <div class="up-icon">📷</div><p>Click to upload a photo</p>
+              <input type="file" id="civic-img" accept="image/*" onchange="previewImg('civic-img','civic-prev')">
+              <img id="civic-prev" class="upload-preview">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="submitCivic()">🚨 Submit Complaint</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">📋 My Complaints</div>
+        <div id="my-complaints"><div class="empty-state"><div class="ei">📭</div><p>No complaints yet.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOD ═══ -->
+<div id="page-food" class="page">
+  <nav><div class="nav-brand">🏛️ CivicConnect</div><div class="nav-user"><div class="nav-cid" id="cid3"></div><button class="btn-nav" onclick="showPage('page-dashboard')">← Dashboard</button></div></nav>
+  <div class="container">
+    <div class="subpage-head"><button class="back-btn" onclick="showPage('page-dashboard')">←</button><div class="subpage-title"><h2>🍲 Food Donation Portal</h2><p>Donate food or find available donations near you</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="section-title">🍛 Donate Food</div>
+        <div class="card">
+          <div class="form-group"><label>🍛 Food Item Name</label><input type="text" id="food-name" placeholder="e.g. Cooked Rice, Bread, Biryani"></div>
+          <div class="form-group"><label>📦 Quantity Available</label><input type="text" id="food-qty" placeholder="e.g. 5 kg, 20 plates"></div>
+          <div class="form-group"><label>📍 Pickup Location</label><div class="loc-wrap"><input type="text" id="food-loc" placeholder="Your pickup address"><button class="loc-btn" onclick="captureGPS('food-loc',this)">📍 Capture GPS</button></div></div>
+          <div class="form-group"><label>📱 Contact Number</label><input type="tel" id="food-contact" placeholder="Your mobile number"></div>
+          <button class="btn btn-orange btn-full" onclick="donateFood()">🍲 Donate Food</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">🍽️ Available Donations</div>
+        <div id="food-list"><div class="empty-state"><div class="ei">🍽️</div><p>No donations yet. Be the first!</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FARMER ═══ -->
+<div id="page-farmer" class="page">
+  <nav><div class="nav-brand">🏛️ CivicConnect</div><div class="nav-user"><div class="nav-cid" id="cid4"></div><button class="btn-nav" onclick="showPage('page-dashboard')">← Dashboard</button></div></nav>
+  <div class="container">
+    <div class="subpage-head"><button class="back-btn" onclick="showPage('page-dashboard')">←</button><div class="subpage-title"><h2>🌾 Farmer Direct Market</h2><p>Fresh produce directly from farmers to your table</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="section-title">🌽 List Your Product</div>
+        <div class="card">
+          <div class="form-group"><label>🌽 Product Name</label><input type="text" id="prod-name" placeholder="e.g. Organic Tomatoes, Fresh Rice"></div>
+          <div class="form-group"><label>📷 Product Image</label>
+            <div class="upload-area" onclick="document.getElementById('prod-img').click()">
+              <div class="up-icon">🌿</div><p>Click to upload product photo</p>
+              <input type="file" id="prod-img" accept="image/*" onchange="previewImg('prod-img','prod-prev')">
+              <img id="prod-prev" class="upload-preview">
+            </div>
+          </div>
+          <div class="form-group"><label>💰 Price (per unit)</label><input type="text" id="prod-price" placeholder="e.g. ₹50/kg, ₹120/dozen"></div>
+          <div class="form-group"><label>📦 Available Quantity</label><input type="text" id="prod-qty" placeholder="e.g. 100 kg, 50 dozen"></div>
+          <div class="form-group"><label>📱 Contact Number</label><input type="tel" id="prod-contact" placeholder="Your mobile number"></div>
+          <button class="btn btn-green btn-full" onclick="addProduct()">🌾 Add Product</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">🛒 Marketplace</div>
+        <div id="product-grid" class="product-grid"><div class="empty-state" style="grid-column:1/-1"><div class="ei">🌱</div><p>No products yet.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div id="page-admin" class="page">
+  <nav>
+    <div class="nav-brand">🏛️ CivicConnect <span style="background:var(--red);color:#fff;font-size:0.63rem;padding:2px 8px;border-radius:4px;margin-left:6px;font-weight:700;vertical-align:middle">ADMIN</span></div>
+    <div class="nav-user"><span style="font-size:0.82rem;color:var(--text2);font-weight:600">⚙️ Administrator</span><button class="btn-nav" onclick="logout()">Logout</button></div>
+  </nav>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="sidebar-label">Admin Menu</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item active" onclick="switchTab('tab-overview',this)">📊 Overview</li>
+        <li class="sidebar-item" onclick="switchTab('tab-users',this)">👥 Users</li>
+        <li class="sidebar-item" onclick="switchTab('tab-complaints',this)">📢 Complaints</li>
+        <li class="sidebar-item" onclick="switchTab('tab-food',this)">🍲 Food Donations</li>
+        <li class="sidebar-item" onclick="switchTab('tab-products',this)">🌾 Products</li>
+      </ul>
+    </div>
+    <div class="admin-main">
+
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="admin-tab-content active">
+        <div class="section-title">📊 System Overview</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="st-users">0</div><div class="stat-label">👥 Users</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-complaints">0</div><div class="stat-label">📢 Complaints</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-food">0</div><div class="stat-label">🍲 Donations</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-products">0</div><div class="stat-label">🌾 Products</div></div>
+        </div>
+        <div class="section-title">📋 Complaint Status</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="st-pending" style="color:#e65100">0</div><div class="stat-label">⏳ Pending</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-inprog" style="color:#1565c0">0</div><div class="stat-label">🔧 In Progress</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-resolved" style="color:#2e7d32">0</div><div class="stat-label">✅ Resolved</div></div>
+        </div>
+        <div class="section-title">🕐 Recent Activity</div>
+        <div id="recent-activity"></div>
+      </div>
+
+      <!-- USERS -->
+      <div id="tab-users" class="admin-tab-content">
+        <div class="section-title">👥 Registered Users</div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>Citizen ID</th><th>Full Name</th><th>Mobile</th><th>Joined</th></tr></thead>
+            <tbody id="admin-users-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COMPLAINTS -->
+      <div id="tab-complaints" class="admin-tab-content">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;">
+          <div class="section-title" style="margin-bottom:0;flex:1">📢 All Complaints</div>
+          <select id="filter-status" onchange="renderAdminComplaints()" style="width:auto;padding:7px 12px;font-size:0.8rem;border-radius:8px;border:1.5px solid var(--border);">
+            <option value="">All Status</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="in-progress">🔧 In Progress</option>
+            <option value="resolved">✅ Resolved</option>
+          </select>
+        </div>
+        <div id="admin-complaints-list"></div>
+      </div>
+
+      <!-- FOOD -->
+      <div id="tab-food" class="admin-tab-content">
+        <div class="section-title">🍲 Food Donations</div>
+        <div id="admin-food-list"></div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div id="tab-products" class="admin-tab-content">
+        <div class="section-title">🌾 Farmer Products</div>
+        <div id="admin-products-list" class="product-grid"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
