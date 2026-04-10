@@ -1,132 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CivicConnect – Smart Community Support</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
-<!-- ambient -->
-<div class="blob1"></div><div class="blob2"></div><div class="blob3"></div>
-
-<!-- ── NOTIFICATION ── -->
-<div id="notif">
-  <div class="notif-inner">
-    <div class="notif-dot"></div>
-    <div><div class="notif-t" id="notif-t"></div><div class="notif-m" id="notif-m"></div></div>
+ 
+<!-- BLOBS -->
+<div class="blob1"></div><div class="blob2"></div>
+ 
+<!-- NOTIFICATION BELL PANEL -->
+<div id="bell-panel" class="bell-panel">
+  <div class="bell-header">
+    <span class="bell-title" data-t="notifications">🔔 Notifications</span>
+    <button onclick="clearNotifs()" class="bell-clear" data-t="clearAll">Clear All</button>
+  </div>
+  <div id="bell-list"></div>
+</div>
+ 
+<!-- TOAST -->
+<div id="toast"><div class="toast-icon" id="ti"></div><span id="tm"></span></div>
+ 
+<!-- SUCCESS OVERLAY -->
+<div id="sov">
+  <div class="sbox">
+    <div class="sring"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+    <h2 id="s-title"></h2>
+    <p id="s-msg"></p>
+    <div class="sdots"><span></span><span></span><span></span></div>
+    <button class="btn btn-red btn-full" onclick="closeSov()" data-t="gotIt">✓ Got it!</button>
   </div>
 </div>
-
-<!-- ── TOAST ── -->
-<div id="toast"><div class="toast-icon" id="toast-icon">✅</div><span id="toast-msg"></span></div>
-
-<!-- ── SUCCESS OVERLAY ── -->
-<div id="success-overlay">
-  <div class="success-box">
-    <div class="success-ring">
-      <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-    </div>
-    <h2 id="suc-title">Submitted Successfully!</h2>
-    <p id="suc-msg">Your information has been saved and is now live on the platform.</p>
-    <div class="success-dots"><div class="sdot"></div><div class="sdot"></div><div class="sdot"></div></div>
-    <button class="btn btn-red btn-full" onclick="closeSuccess()">✓ Got it!</button>
-  </div>
-</div>
-
-<!-- ── CID MODAL ── -->
+ 
+<!-- CID MODAL -->
 <div class="overlay" id="cid-modal">
   <div class="mbox">
     <div class="mbox-emoji">🎉</div>
-    <h2>Registration Successful!</h2>
-    <p>Your Citizen ID has been generated. Please save it — you'll need it every time you login.</p>
+    <h2 data-t="regSuccess">Registration Successful!</h2>
+    <p data-t="regSuccessMsg">Save your Citizen ID — you need it to login every time.</p>
     <div class="cid-box" id="cid-val">CC10245</div>
     <div class="mbox-btns">
-      <button class="btn btn-outline" onclick="copyID()">📋 Copy ID</button>
-      <button class="btn btn-red" onclick="goLogin()">Login Now →</button>
+      <button class="btn btn-outline" onclick="copyID()" data-t="copyId">📋 Copy ID</button>
+      <button class="btn btn-red" onclick="goLogin()" data-t="loginNow">Login Now →</button>
     </div>
   </div>
 </div>
-
-<!-- ── CONFIRM MODAL ── -->
+ 
+<!-- CONFIRM MODAL -->
 <div class="overlay" id="conf-modal">
   <div class="mbox" style="max-width:360px">
     <div class="mbox-emoji">🗑️</div>
-    <h2 style="font-size:1.15rem">Confirm Delete</h2>
-    <p id="conf-msg">This action cannot be undone.</p>
+    <h2 data-t="confirmDelete">Confirm Delete</h2>
+    <p id="conf-msg"></p>
     <div class="mbox-btns">
-      <button class="btn btn-outline" onclick="confNo()">✕ Cancel</button>
-      <button class="btn btn-red" onclick="confYes()">Delete</button>
+      <button class="btn btn-outline" onclick="confNo()" data-t="cancel">✕ Cancel</button>
+      <button class="btn btn-red" onclick="confYes()" data-t="delete">Delete</button>
     </div>
   </div>
 </div>
-
+ 
+<!-- COMMENT MODAL -->
+<div class="overlay" id="comment-modal">
+  <div class="mbox" style="max-width:520px;text-align:left">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:1.1rem" data-t="comments">💬 Comments</h2>
+      <button onclick="document.getElementById('comment-modal').classList.remove('show')" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2)">✕</button>
+    </div>
+    <div id="comment-list" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="comment-input" class="cinput" data-placeholder-t="writeComment" placeholder="Write a comment..." style="flex:1;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.85rem;outline:none">
+      <button class="btn btn-red btn-sm" onclick="submitComment()">Send</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- SHARE MODAL -->
+<div class="overlay" id="share-modal">
+  <div class="mbox" style="max-width:360px">
+    <div class="mbox-emoji">📤</div>
+    <h2 data-t="shareComplaint">Share Complaint</h2>
+    <p id="share-text" style="font-size:0.82rem;background:var(--bg2);padding:12px;border-radius:10px;margin:12px 0;text-align:left;line-height:1.6"></p>
+    <div class="mbox-btns" style="flex-wrap:wrap">
+      <button class="btn btn-green btn-sm" onclick="shareWA()">📱 WhatsApp</button>
+      <button class="btn btn-outline btn-sm" onclick="copyShare()" data-t="copyLink">📋 Copy</button>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('share-modal').classList.remove('show')" data-t="close">✕ Close</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- FARMER SUBSCRIPTION MODAL -->
+<div class="overlay" id="sub-modal">
+  <div class="mbox" style="max-width:380px">
+    <div class="mbox-emoji">🔔</div>
+    <h2 data-t="subscribeProduct">Subscribe to Product</h2>
+    <p id="sub-prod-name" style="font-weight:700;color:var(--red);margin-bottom:12px"></p>
+    <div class="fg">
+      <label data-t="yourMobile">📱 Your Mobile</label>
+      <input type="tel" id="sub-mobile" placeholder="Enter mobile number">
+    </div>
+    <div class="mbox-btns">
+      <button class="btn btn-outline" onclick="document.getElementById('sub-modal').classList.remove('show')" data-t="cancel">Cancel</button>
+      <button class="btn btn-teal" onclick="confirmSub()" data-t="subscribe">🔔 Subscribe</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- BULK ORDER MODAL -->
+<div class="overlay" id="bulk-modal">
+  <div class="mbox" style="max-width:420px;text-align:left">
+    <h2 style="margin-bottom:4px" data-t="bulkOrder">📦 Post Bulk Order</h2>
+    <p style="color:var(--text2);font-size:0.82rem;margin-bottom:18px" data-t="bulkOrderDesc">Post your requirement — farmers will contact you</p>
+    <div class="fg"><label data-t="productNeeded">🌽 Product Needed</label><input type="text" id="bulk-prod" placeholder="e.g. Tomatoes, Rice"></div>
+    <div class="fg-row">
+      <div class="fg"><label data-t="quantity">📦 Quantity</label><input type="text" id="bulk-qty" placeholder="e.g. 100 kg"></div>
+      <div class="fg"><label data-t="contact">📱 Contact</label><input type="tel" id="bulk-contact" placeholder="Mobile"></div>
+    </div>
+    <div class="fg"><label data-t="location">📍 Location</label><input type="text" id="bulk-loc" placeholder="Your location"></div>
+    <div class="mbox-btns">
+      <button class="btn btn-outline" onclick="document.getElementById('bulk-modal').classList.remove('show')" data-t="cancel">Cancel</button>
+      <button class="btn btn-orange" onclick="submitBulk()" data-t="postOrder">📦 Post Order</button>
+    </div>
+  </div>
+</div>
+ 
 <!-- ════════════ LANDING ════════════ -->
 <div id="page-landing" class="page active">
   <div class="hero-topnav">
-    <div class="brand"><div class="brand-icon">🏛️</div>CivicConnect</div>
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
     <div class="hn-btns">
-      <button class="btn btn-outline btn-sm" onclick="go('page-login')">Login</button>
-      <button class="btn btn-red btn-sm" onclick="go('page-register')">Register Free</button>
+      <button class="icon-btn" onclick="toggleLang()" id="lang-btn" title="Toggle Language">🌐 தமிழ்</button>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+      <button class="btn btn-outline btn-sm" onclick="go('page-login')" data-t="login">Login</button>
+      <button class="btn btn-red btn-sm" onclick="go('page-register')" data-t="register">Register</button>
       <button class="btn btn-outline btn-sm" onclick="go('page-admin-login')">⚙️ Admin</button>
     </div>
   </div>
   <div class="hero">
-    <div class="hero-eyebrow">✨ Smart Community Support System</div>
-    <h1>Connect. Report.<br><em>Build Together.</em></h1>
-    <p class="hero-sub">CivicConnect bridges citizens, farmers, NGOs, and administrators in one powerful digital ecosystem for a smarter, stronger community.</p>
+    <div class="hero-eyebrow" data-t="tagline">✨ Smart Community Support System</div>
+    <h1 data-t="heroTitle">Connect. Report.<br><em>Build Together.</em></h1>
+    <p class="hero-sub" data-t="heroSub">CivicConnect bridges citizens, farmers, NGOs, and administrators in one powerful digital ecosystem for a smarter, stronger community.</p>
     <div class="hero-cta">
-      <button class="btn btn-red" onclick="go('page-register')">🚀 Get Started — It's Free</button>
-      <button class="btn btn-outline" onclick="go('page-login')">🔐 Login</button>
-      <button class="btn btn-outline" onclick="go('page-admin-login')">⚙️ Admin Panel</button>
+      <button class="btn btn-red" onclick="go('page-register')" data-t="getStarted">🚀 Get Started Free</button>
+      <button class="btn btn-outline" onclick="go('page-login')" data-t="loginBtn">🔐 Login</button>
+      <button class="btn btn-outline" onclick="go('page-admin-login')">⚙️ Admin</button>
     </div>
     <div class="hero-features">
-      <div class="feat-chip">🏙️ Civic Issue Reporting</div>
-      <div class="feat-chip">🍲 Food Donation Portal</div>
-      <div class="feat-chip">🌾 Farmer Direct Market</div>
+      <div class="feat-chip" data-t="feat1">🏙️ Civic Issue Reporting</div>
+      <div class="feat-chip" data-t="feat2">🍲 Food Donation Portal</div>
+      <div class="feat-chip" data-t="feat3">🌾 Farmer Direct Market</div>
+      <div class="feat-chip" data-t="feat4">🏆 Points & Badges</div>
     </div>
     <div class="hero-stats">
-      <div class="hstat"><div class="hstat-num" id="ls-users">0</div><div class="hstat-lbl">Citizens</div></div>
-      <div class="hstat"><div class="hstat-num" id="ls-complaints">0</div><div class="hstat-lbl">Issues Reported</div></div>
-      <div class="hstat"><div class="hstat-num" id="ls-food">0</div><div class="hstat-lbl">Food Donations</div></div>
+      <div class="hstat"><div class="hstat-num" id="ls-u">0</div><div class="hstat-lbl" data-t="citizens">Citizens</div></div>
+      <div class="hstat"><div class="hstat-num" id="ls-c">0</div><div class="hstat-lbl" data-t="issuesReported">Issues Reported</div></div>
+      <div class="hstat"><div class="hstat-num" id="ls-f">0</div><div class="hstat-lbl" data-t="foodDonations">Food Donations</div></div>
+      <div class="hstat"><div class="hstat-num" id="ls-r">0</div><div class="hstat-lbl" data-t="resolved">Resolved</div></div>
     </div>
   </div>
+ 
+  <!-- SUCCESS STORIES -->
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="sec-lbl" data-t="successStories">🎉 Success Stories</div>
+    <div id="success-feed" class="success-feed"></div>
+  </div>
 </div>
-
+ 
 <!-- ════════════ REGISTER ════════════ -->
 <div id="page-register" class="page">
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-icon">🏛️</div>
-      <h1>Create Account</h1>
-      <p class="sub">Join thousands improving their community</p>
-      <div class="fg"><label>👤 Full Name</label><input type="text" id="reg-name" placeholder="Enter your full name"></div>
-      <div class="fg"><label>📱 Mobile Number</label><input type="tel" id="reg-mob" placeholder="Enter your 10-digit mobile number"></div>
-      <button class="btn btn-red btn-full" onclick="register()" style="margin-bottom:6px">✨ Create My Account</button>
-      <div class="auth-foot">Already have an account? <a onclick="go('page-login')">Login here</a></div>
-      <div class="auth-foot"><a onclick="go('page-landing')">← Back to Home</a></div>
+      <h1 data-t="createAccount">Create Account</h1>
+      <p class="sub" data-t="joinThousands">Join thousands improving their community</p>
+      <div class="fg"><label data-t="fullName">👤 Full Name</label><input type="text" id="reg-name" data-placeholder-t="enterName" placeholder="Enter your full name"></div>
+      <div class="fg"><label data-t="mobileNumber">📱 Mobile Number</label><input type="tel" id="reg-mob" data-placeholder-t="enterMobile" placeholder="Enter your 10-digit mobile number"></div>
+      <button class="btn btn-red btn-full" onclick="register()" data-t="createMyAccount">✨ Create My Account</button>
+      <div class="auth-foot"><span data-t="alreadyHave">Already have an account?</span> <a onclick="go('page-login')" data-t="loginHere">Login here</a></div>
+      <div class="auth-foot"><a onclick="go('page-landing')" data-t="backHome">← Back to Home</a></div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ LOGIN ════════════ -->
 <div id="page-login" class="page">
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-icon">🔐</div>
-      <h1>Welcome Back</h1>
-      <p class="sub">Login with your Citizen ID and mobile number</p>
-      <div class="fg"><label>🆔 Citizen ID</label><input type="text" id="li-id" placeholder="e.g. CC10245" style="font-family:'Space Mono',monospace;letter-spacing:2px"></div>
-      <div class="fg"><label>📱 Mobile Number</label><input type="tel" id="li-mob" placeholder="Enter your mobile number"></div>
-      <button class="btn btn-red btn-full" onclick="login()" style="margin-bottom:6px">→ Login to Dashboard</button>
-      <div class="auth-foot">New here? <a onclick="go('page-register')">Create an account</a></div>
-      <div class="auth-foot"><a onclick="go('page-landing')">← Back to Home</a></div>
+      <h1 data-t="welcomeBack">Welcome Back</h1>
+      <p class="sub" data-t="loginSub">Login with your Citizen ID and mobile number</p>
+      <div class="fg"><label>🆔 <span data-t="citizenId">Citizen ID</span></label><input type="text" id="li-id" placeholder="e.g. CC10245" style="font-family:'Space Mono',monospace;letter-spacing:2px"></div>
+      <div class="fg"><label data-t="mobileNumber">📱 Mobile Number</label><input type="tel" id="li-mob" data-placeholder-t="enterMobile" placeholder="Enter your mobile number"></div>
+      <button class="btn btn-red btn-full" onclick="login()" data-t="loginDash">→ Login to Dashboard</button>
+      <div class="auth-foot"><span data-t="newHere">New here?</span> <a onclick="go('page-register')" data-t="createAccount2">Create an account</a></div>
+      <div class="auth-foot"><a onclick="go('page-landing')" data-t="backHome">← Back to Home</a></div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ ADMIN LOGIN ════════════ -->
 <div id="page-admin-login" class="page">
   <div class="auth-page">
@@ -137,81 +211,123 @@
       <div class="hint-box">🔑 Username: <b>admin</b> &nbsp;·&nbsp; Password: <b>admin123</b></div>
       <div class="fg"><label>👤 Username</label><input type="text" id="au" placeholder="admin"></div>
       <div class="fg"><label>🔑 Password</label><input type="password" id="ap" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"></div>
-      <button class="btn btn-red btn-full" onclick="adminLogin()" style="margin-bottom:6px">⚙️ Access Admin Panel</button>
-      <div class="auth-foot"><a onclick="go('page-landing')">← Back to Home</a></div>
+      <button class="btn btn-red btn-full" onclick="adminLogin()">⚙️ Access Admin Panel</button>
+      <div class="auth-foot"><a onclick="go('page-landing')" data-t="backHome">← Back to Home</a></div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ DASHBOARD ════════════ -->
 <div id="page-dashboard" class="page">
   <div class="topnav">
-    <div class="brand"><div class="brand-icon">🏛️</div>CivicConnect</div>
-    <div class="topnav-right"><div class="pill" id="d-cid">--</div><button class="nav-btn" onclick="logout()">Logout</button></div>
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
+    <div class="topnav-right">
+      <button class="icon-btn" onclick="toggleLang()" data-t="langToggle">🌐 தமிழ்</button>
+      <button class="icon-btn" onclick="toggleTheme()">🌙</button>
+      <div class="bell-wrap">
+        <button class="icon-btn" onclick="toggleBell()" id="bell-btn">🔔<span class="bell-badge" id="bell-count" style="display:none">0</span></button>
+      </div>
+      <div class="pill" id="d-cid">--</div>
+      <button class="nav-btn" onclick="go('page-profile')">👤</button>
+      <button class="nav-btn" onclick="logout()" data-t="logout">Logout</button>
+    </div>
   </div>
   <div class="dash-banner">
     <div style="position:relative;z-index:1">
-      <div class="banner-eyebrow">👋 Welcome back</div>
-      <div class="banner-h1" id="d-name">Hello, Citizen!</div>
-      <div class="banner-sub">What would you like to do today?</div>
+      <div class="banner-eye" data-t="welcomeBack">👋 Welcome back</div>
+      <div class="banner-h1" id="d-name">Hello!</div>
+      <div class="banner-sub" data-t="dashSub">What would you like to do today?</div>
       <div class="quick-stats">
-        <div class="qs"><div class="qs-num" id="qs-c">0</div><div class="qs-lbl">My Complaints</div></div>
-        <div class="qs"><div class="qs-num" id="qs-f">0</div><div class="qs-lbl">Donations</div></div>
-        <div class="qs"><div class="qs-num" id="qs-p">0</div><div class="qs-lbl">Products</div></div>
+        <div class="qs"><div class="qs-num" id="qs-c">0</div><div class="qs-lbl" data-t="myComplaints">My Complaints</div></div>
+        <div class="qs"><div class="qs-num" id="qs-pts">0</div><div class="qs-lbl" data-t="points">🏆 Points</div></div>
+        <div class="qs"><div class="qs-num" id="qs-b">0</div><div class="qs-lbl" data-t="badges">🏅 Badges</div></div>
       </div>
     </div>
   </div>
   <div class="wrap">
+    <!-- BADGES STRIP -->
+    <div id="badge-strip" class="badge-strip"></div>
+    <!-- SERVICE CARDS -->
     <div class="services-grid">
       <div class="svc svc-red" onclick="go('page-civic')">
         <div class="svc-img">🏙️</div>
-        <h3>Report Civic Issues</h3>
-        <p>Road damage, broken streetlights, garbage overflow, water leakage — report it directly to authorities.</p>
-        <div class="svc-link">Report Now <span>→</span></div>
+        <h3 data-t="reportCivic">Report Civic Issues</h3>
+        <p data-t="reportCivicDesc">Road damage, broken lights, garbage, water leakage — report directly to authorities.</p>
+        <div class="svc-link" data-t="reportNow">Report Now →</div>
       </div>
       <div class="svc svc-orange" onclick="go('page-food')">
         <div class="svc-img">🍲</div>
-        <h3>Food Donation</h3>
-        <p>Donate surplus food or connect NGOs and volunteers to distribute meals to those in need.</p>
-        <div class="svc-link">Donate Now <span>→</span></div>
+        <h3 data-t="foodDonation">Food Donation</h3>
+        <p data-t="foodDonationDesc">Donate surplus food or connect NGOs to distribute meals to those in need.</p>
+        <div class="svc-link" data-t="donateNow">Donate Now →</div>
       </div>
       <div class="svc svc-teal" onclick="go('page-farmer')">
         <div class="svc-img">🌾</div>
-        <h3>Farmer Market</h3>
-        <p>Buy fresh produce directly from local farmers, or list your harvest for buyers near you.</p>
-        <div class="svc-link">Explore Market <span>→</span></div>
+        <h3 data-t="farmerMarket">Farmer Market</h3>
+        <p data-t="farmerMarketDesc">Buy fresh produce from local farmers or list your harvest for buyers near you.</p>
+        <div class="svc-link" data-t="exploreMarket">Explore Market →</div>
       </div>
     </div>
-    <div class="sec-lbl">📋 My Recent Complaints</div>
-    <div id="d-complaints"><div class="empty"><span class="empty-ico">📭</span><p>No complaints yet. Report an issue to get started!</p></div></div>
+    <!-- LEADERBOARD TEASER -->
+    <div class="sec-lbl" data-t="topCitizens">🏆 Top Citizens This Week</div>
+    <div id="leaderboard-mini" class="leaderboard-mini"></div>
+    <div class="sec-lbl" data-t="myRecentComplaints">📋 My Recent Complaints</div>
+    <div id="d-complaints"></div>
   </div>
   <div class="bnav"><div class="bnav-inner">
-    <button class="bn on" onclick="go('page-dashboard')"><div class="bi-wrap bi">🏠</div><span>Home</span></button>
-    <button class="bn" onclick="go('page-civic')"><div class="bi">🏙️</div><span>Civic</span></button>
-    <button class="bn" onclick="go('page-food')"><div class="bi">🍲</div><span>Food</span></button>
-    <button class="bn" onclick="go('page-farmer')"><div class="bi">🌾</div><span>Market</span></button>
+    <button class="bn on" onclick="go('page-dashboard')"><div class="bi">🏠</div><span data-t="home">Home</span></button>
+    <button class="bn" onclick="go('page-civic')"><div class="bi">🏙️</div><span data-t="civic">Civic</span></button>
+    <button class="bn" onclick="go('page-food')"><div class="bi">🍲</div><span data-t="food">Food</span></button>
+    <button class="bn" onclick="go('page-farmer')"><div class="bi">🌾</div><span data-t="market">Market</span></button>
+    <button class="bn" onclick="go('page-profile')"><div class="bi">👤</div><span data-t="profile">Profile</span></button>
   </div></div>
 </div>
-
+ 
+<!-- ════════════ PROFILE ════════════ -->
+<div id="page-profile" class="page">
+  <div class="topnav">
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
+    <div class="topnav-right"><button class="nav-btn" onclick="go('page-dashboard')" data-t="backDash">← Dashboard</button><button class="nav-btn" onclick="logout()" data-t="logout">Logout</button></div>
+  </div>
+  <div class="wrap" style="padding-top:32px;padding-bottom:60px">
+    <div class="profile-card">
+      <div class="profile-avatar" id="p-avatar">👤</div>
+      <div class="profile-info">
+        <h2 id="p-name">--</h2>
+        <div class="p-cid" id="p-cid">--</div>
+        <div class="p-joined" id="p-joined">--</div>
+      </div>
+      <div class="profile-pts">
+        <div class="pts-num" id="p-pts">0</div>
+        <div class="pts-lbl" data-t="totalPoints">Total Points</div>
+      </div>
+    </div>
+    <div class="sec-lbl" data-t="myBadges">🏅 My Badges</div>
+    <div id="p-badges" class="badges-grid"></div>
+    <div class="sec-lbl" data-t="activityHistory">📊 Activity History</div>
+    <div id="p-activity" class="p-activity-list"></div>
+  </div>
+</div>
+ 
 <!-- ════════════ CIVIC ════════════ -->
 <div id="page-civic" class="page">
   <div class="topnav">
-    <div class="brand"><div class="brand-icon">🏛️</div>CivicConnect</div>
-    <div class="topnav-right"><div class="pill" id="cid-civic"></div><button class="nav-btn" onclick="go('page-dashboard')">← Dashboard</button></div>
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
+    <div class="topnav-right"><div class="pill" id="cid-civic"></div><button class="nav-btn" onclick="go('page-dashboard')" data-t="backDash">← Dashboard</button></div>
   </div>
   <div class="wrap">
     <div class="sub-header">
       <button class="back-btn" onclick="go('page-dashboard')">←</button>
-      <div class="sub-title"><h2>🏙️ Report Civic Issues</h2><p>Submit your complaint and track real-time status updates</p></div>
+      <div class="sub-title"><h2 data-t="reportCivicIssues">🏙️ Report Civic Issues</h2><p data-t="reportCivicSub">Submit complaints & track real-time status</p></div>
     </div>
     <div class="two-col">
       <div>
-        <div class="sec-lbl">📝 New Complaint</div>
+        <div class="sec-lbl" data-t="newComplaint">📝 New Complaint</div>
         <div class="card">
-          <div class="fg"><label>📝 Issue Title</label><input type="text" id="cv-title" placeholder="e.g. Broken streetlight on Main Road"></div>
-          <div class="fg"><label>🏷️ Category</label>
+          <div class="fg"><label data-t="issueTitle">📝 Issue Title</label><input type="text" id="cv-title" data-placeholder-t="issueTitlePh" placeholder="e.g. Broken streetlight on Main Road"></div>
+          <div class="fg"><label data-t="category">🏷️ Category</label>
             <select id="cv-cat">
-              <option value="🚧 Road Damage">🚧 Road Damage</option>
+              <option value="🚧 Road Damage" data-t-opt="roadDamage">🚧 Road Damage</option>
               <option value="💡 Broken Streetlight">💡 Broken Streetlight</option>
               <option value="🗑️ Garbage Overflow">🗑️ Garbage Overflow</option>
               <option value="💧 Water Leakage">💧 Water Leakage</option>
@@ -219,176 +335,253 @@
               <option value="🏗️ Other">🏗️ Other</option>
             </select>
           </div>
-          <div class="fg"><label>📄 Description</label><textarea id="cv-desc" placeholder="Describe the issue in detail..."></textarea></div>
-          <div class="fg"><label>📍 Location</label>
-            <div class="loc-wrap"><input type="text" id="cv-loc" placeholder="Your location"><button class="loc-btn" onclick="gps('cv-loc',this)">📍 Capture GPS</button></div>
+          <div class="fg"><label data-t="description">📄 Description</label><textarea id="cv-desc" data-placeholder-t="descPh" placeholder="Describe the issue in detail..."></textarea></div>
+          <div class="fg"><label data-t="location">📍 Location</label>
+            <div class="loc-wrap"><input type="text" id="cv-loc" data-placeholder-t="locationPh" placeholder="Your location"><button class="loc-btn" onclick="gps('cv-loc',this)" data-t="captureGps">📍 Capture GPS</button></div>
           </div>
-          <div class="fg"><label>📷 Issue Photo <span style="font-size:0.65rem;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></label>
+          <div class="fg">
+            <label data-t="priority">🚦 Priority</label>
+            <div class="priority-btns">
+              <button class="pri-btn pri-low active" onclick="setPri(this,'low')" data-t="low">🟢 Low</button>
+              <button class="pri-btn pri-med" onclick="setPri(this,'medium')" data-t="medium">🟡 Medium</button>
+              <button class="pri-btn pri-high" onclick="setPri(this,'high')" data-t="high">🔴 High</button>
+            </div>
+          </div>
+          <div class="fg"><label data-t="issuePhoto">📷 Issue Photo <span style="font-size:0.65rem;text-transform:none;letter-spacing:0;color:var(--text3)" data-t="optional">(optional)</span></label>
             <div class="upload-box" onclick="document.getElementById('cv-img').click()">
-              <div class="up-ico">📷</div><p>Click or tap to upload a photo</p>
+              <div class="up-ico">📷</div><p data-t="clickUpload">Click or tap to upload a photo</p>
               <input type="file" id="cv-img" accept="image/*" onchange="previewImg('cv-img','cv-prev')">
               <img id="cv-prev" class="up-prev">
             </div>
           </div>
-          <button class="btn btn-red btn-full" onclick="submitCivic()">🚨 Submit Complaint</button>
+          <button class="btn btn-red btn-full" onclick="submitCivic()" data-t="submitComplaint">🚨 Submit Complaint</button>
         </div>
       </div>
       <div>
-        <div class="sec-lbl">📋 My Complaints</div>
-        <div id="my-complaints"><div class="empty"><span class="empty-ico">📭</span><p>No complaints yet.</p></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="sec-lbl" style="margin-bottom:0" data-t="allComplaints">📋 All Complaints</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" id="search-comp" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid var(--border2);border-radius:8px;font-size:0.78rem;background:var(--card);color:var(--text);outline:none;width:140px" oninput="renderComp()">
+          </div>
+        </div>
+        <div id="my-complaints"></div>
       </div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ FOOD ════════════ -->
 <div id="page-food" class="page">
   <div class="topnav">
-    <div class="brand"><div class="brand-icon">🏛️</div>CivicConnect</div>
-    <div class="topnav-right"><div class="pill" id="cid-food"></div><button class="nav-btn" onclick="go('page-dashboard')">← Dashboard</button></div>
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
+    <div class="topnav-right"><div class="pill" id="cid-food"></div><button class="nav-btn" onclick="go('page-dashboard')" data-t="backDash">← Dashboard</button></div>
   </div>
   <div class="wrap">
     <div class="sub-header">
       <button class="back-btn" onclick="go('page-dashboard')">←</button>
-      <div class="sub-title"><h2>🍲 Food Donation Portal</h2><p>Donate food or find available donations near you</p></div>
+      <div class="sub-title"><h2 data-t="foodPortal">🍲 Food Donation Portal</h2><p data-t="foodPortalSub">Donate food or find available donations near you</p></div>
     </div>
     <div class="two-col">
       <div>
-        <div class="sec-lbl">🍛 Donate Food</div>
+        <div class="sec-lbl" data-t="donateFood">🍛 Donate Food</div>
         <div class="card">
-          <div class="fg"><label>🍛 Food Item Name</label><input type="text" id="fd-name" placeholder="e.g. Cooked Rice, Bread, Biryani"></div>
+          <div class="fg"><label data-t="foodItemName">🍛 Food Item Name</label><input type="text" id="fd-name" data-placeholder-t="foodNamePh" placeholder="e.g. Cooked Rice, Bread, Biryani"></div>
           <div class="fg-row">
-            <div class="fg"><label>📦 Quantity</label><input type="text" id="fd-qty" placeholder="e.g. 5 kg, 20 plates"></div>
-            <div class="fg"><label>📱 Contact</label><input type="tel" id="fd-contact" placeholder="Mobile number"></div>
+            <div class="fg"><label data-t="quantity">📦 Quantity</label><input type="text" id="fd-qty" placeholder="5 kg / 20 plates"></div>
+            <div class="fg"><label data-t="contact">📱 Contact</label><input type="tel" id="fd-contact" placeholder="Mobile number"></div>
           </div>
-          <div class="fg"><label>📍 Pickup Location</label>
-            <div class="loc-wrap"><input type="text" id="fd-loc" placeholder="Pickup address"><button class="loc-btn" onclick="gps('fd-loc',this)">📍 Capture GPS</button></div>
+          <div class="fg"><label data-t="pickupLocation">📍 Pickup Location</label>
+            <div class="loc-wrap"><input type="text" id="fd-loc" data-placeholder-t="locationPh" placeholder="Pickup address"><button class="loc-btn" onclick="gps('fd-loc',this)" data-t="captureGps">📍 GPS</button></div>
           </div>
-          <button class="btn btn-orange btn-full" onclick="donateFood()">🍲 Donate Food Now</button>
+          <button class="btn btn-orange btn-full" onclick="donateFood()" data-t="donateFoodBtn">🍲 Donate Food Now</button>
         </div>
+        <br>
+        <div class="sec-lbl" data-t="bulkOrders">📦 Bulk Orders</div>
+        <div id="bulk-list" class="bulk-list"></div>
+        <button class="btn btn-outline btn-full" onclick="document.getElementById('bulk-modal').classList.add('show')" data-t="postBulkOrder">+ Post Bulk Order Request</button>
       </div>
       <div>
-        <div class="sec-lbl">🍽️ Available Donations</div>
-        <div id="food-list"><div class="empty"><span class="empty-ico">🍽️</span><p>No donations yet. Be the first to donate!</p></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="sec-lbl" style="margin-bottom:0" data-t="availableDonations">🍽️ Available Donations</div>
+        </div>
+        <div id="food-list"></div>
       </div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ FARMER ════════════ -->
 <div id="page-farmer" class="page">
   <div class="topnav">
-    <div class="brand"><div class="brand-icon">🏛️</div>CivicConnect</div>
-    <div class="topnav-right"><div class="pill" id="cid-farmer"></div><button class="nav-btn" onclick="go('page-dashboard')">← Dashboard</button></div>
+    <div class="brand"><div class="brand-icon">🏛️</div><span>CivicConnect</span></div>
+    <div class="topnav-right"><div class="pill" id="cid-farmer"></div><button class="nav-btn" onclick="go('page-dashboard')" data-t="backDash">← Dashboard</button></div>
   </div>
   <div class="wrap">
     <div class="sub-header">
       <button class="back-btn" onclick="go('page-dashboard')">←</button>
-      <div class="sub-title"><h2>🌾 Farmer Direct Market</h2><p>Fresh produce directly from farmers to your table</p></div>
+      <div class="sub-title"><h2 data-t="farmerMarketTitle">🌾 Farmer Direct Market</h2><p data-t="farmerMarketSub">Fresh produce directly from farmers to your table</p></div>
+    </div>
+    <!-- PRICE TREND CHART -->
+    <div class="card" style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div class="sec-lbl" style="margin-bottom:0" data-t="priceTrend">📈 Price Trend (Last 30 Days)</div>
+        <select id="trend-prod" onchange="renderTrendChart()" style="padding:6px 12px;border:1.5px solid var(--border2);border-radius:8px;font-size:0.78rem;background:var(--card);color:var(--text);outline:none">
+          <option>Tomatoes</option><option>Onions</option><option>Potatoes</option><option>Rice</option><option>Coconuts</option>
+        </select>
+      </div>
+      <canvas id="trend-chart" height="120"></canvas>
     </div>
     <div class="two-col">
       <div>
-        <div class="sec-lbl">🌽 List Your Product</div>
+        <div class="sec-lbl" data-t="listProduct">🌽 List Your Product</div>
         <div class="card">
-          <div class="fg"><label>🌽 Product Name</label><input type="text" id="pr-name" placeholder="e.g. Organic Tomatoes, Fresh Rice"></div>
+          <div class="fg"><label data-t="productName">🌽 Product Name</label><input type="text" id="pr-name" data-placeholder-t="productNamePh" placeholder="e.g. Organic Tomatoes"></div>
           <div class="fg-row">
-            <div class="fg"><label>💰 Price</label><input type="text" id="pr-price" placeholder="₹50/kg"></div>
-            <div class="fg"><label>📦 Quantity</label><input type="text" id="pr-qty" placeholder="100 kg"></div>
+            <div class="fg"><label data-t="price">💰 Price</label><input type="text" id="pr-price" placeholder="₹50/kg"></div>
+            <div class="fg"><label data-t="quantity">📦 Quantity</label><input type="text" id="pr-qty" placeholder="100 kg"></div>
           </div>
-          <div class="fg"><label>📱 Contact Number</label><input type="tel" id="pr-contact" placeholder="Your mobile number"></div>
-          <div class="fg"><label>📷 Product Photo <span style="font-size:0.65rem;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></label>
+          <div class="fg-row">
+            <div class="fg"><label data-t="contact">📱 Contact</label><input type="tel" id="pr-contact" placeholder="Mobile"></div>
+            <div class="fg"><label data-t="season">🌤️ Season</label>
+              <select id="pr-season">
+                <option value="all" data-t="allYear">All Year</option>
+                <option value="summer" data-t="summer">Summer</option>
+                <option value="monsoon" data-t="monsoon">Monsoon</option>
+                <option value="winter" data-t="winter">Winter</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label data-t="productPhoto">📷 Product Photo</label>
             <div class="upload-box" onclick="document.getElementById('pr-img').click()">
-              <div class="up-ico">🌿</div><p>Click to upload product photo</p>
+              <div class="up-ico">🌿</div><p data-t="clickUpload">Click to upload photo</p>
               <input type="file" id="pr-img" accept="image/*" onchange="previewImg('pr-img','pr-prev')">
               <img id="pr-prev" class="up-prev">
             </div>
           </div>
-          <button class="btn btn-teal btn-full" onclick="addProduct()">🌾 List My Product</button>
+          <button class="btn btn-teal btn-full" onclick="addProduct()" data-t="listProduct2">🌾 List My Product</button>
         </div>
       </div>
       <div>
-        <div class="sec-lbl">🛒 Marketplace</div>
-        <div id="prod-grid" class="prod-grid"><div class="empty" style="grid-column:1/-1"><span class="empty-ico">🌱</span><p>No products yet. Be the first farmer!</p></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px">
+          <div class="sec-lbl" style="margin-bottom:0" data-t="marketplace">🛒 Marketplace</div>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="search-prod" placeholder="🔍 Search..." style="padding:6px 10px;border:1.5px solid var(--border2);border-radius:8px;font-size:0.76rem;background:var(--card);color:var(--text);outline:none;width:120px" oninput="renderProds()">
+            <select id="season-filter" onchange="renderProds()" style="padding:6px 10px;border:1.5px solid var(--border2);border-radius:8px;font-size:0.76rem;background:var(--card);color:var(--text);outline:none">
+              <option value="">All Seasons</option>
+              <option value="all">All Year</option>
+              <option value="summer">Summer</option>
+              <option value="monsoon">Monsoon</option>
+              <option value="winter">Winter</option>
+            </select>
+          </div>
+        </div>
+        <div id="prod-grid" class="prod-grid"></div>
       </div>
     </div>
   </div>
 </div>
-
+ 
 <!-- ════════════ ADMIN PANEL ════════════ -->
 <div id="page-admin" class="page">
   <div class="topnav">
-    <div class="brand"><div class="brand-icon" style="background:linear-gradient(135deg,#1e293b,#334155)">⚙️</div>CivicConnect <span style="background:#e63946;color:#fff;font-size:0.6rem;padding:2px 8px;border-radius:5px;margin-left:6px;font-weight:800;vertical-align:middle;letter-spacing:0.5px">ADMIN</span></div>
-    <div class="topnav-right"><span style="font-size:0.8rem;color:var(--text2);font-weight:700">⚙️ Administrator</span><button class="nav-btn" onclick="logout()">Logout</button></div>
+    <div class="brand"><div class="brand-icon" style="background:linear-gradient(135deg,#1e293b,#334155)">⚙️</div><span>CivicConnect <span class="admin-tag">ADMIN</span></span></div>
+    <div class="topnav-right">
+      <button class="icon-btn" onclick="toggleTheme()">🌙</button>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()" data-t="exportCsv">📤 Export CSV</button>
+      <button class="nav-btn" onclick="logout()" data-t="logout">Logout</button>
+    </div>
   </div>
   <div class="admin-wrap">
     <div class="admin-side">
       <div class="aside-lbl">Admin Menu</div>
       <ul class="aside-menu">
         <li class="aside-item on" onclick="atab('at-overview',this)">📊 Overview</li>
-        <li class="aside-item" onclick="atab('at-users',this)">👥 Users <span class="aside-count" id="ac-users">0</span></li>
-        <li class="aside-item" onclick="atab('at-complaints',this)">📢 Complaints <span class="aside-count" id="ac-comp">0</span></li>
-        <li class="aside-item" onclick="atab('at-food',this)">🍲 Food Donations <span class="aside-count" id="ac-food">0</span></li>
-        <li class="aside-item" onclick="atab('at-products',this)">🌾 Products <span class="aside-count" id="ac-prod">0</span></li>
+        <li class="aside-item" onclick="atab('at-users',this)">👥 Users <span class="aside-count" id="ac-u">0</span></li>
+        <li class="aside-item" onclick="atab('at-complaints',this)">📢 Complaints <span class="aside-count" id="ac-c">0</span></li>
+        <li class="aside-item" onclick="atab('at-food',this)">🍲 Food <span class="aside-count" id="ac-f">0</span></li>
+        <li class="aside-item" onclick="atab('at-products',this)">🌾 Products <span class="aside-count" id="ac-p">0</span></li>
+        <li class="aside-item" onclick="atab('at-leaderboard',this)">🏆 Leaderboard</li>
       </ul>
     </div>
     <div class="admin-body">
-
+ 
       <!-- OVERVIEW -->
       <div id="at-overview" class="atab on">
         <div class="sec-lbl">📊 Platform Overview</div>
         <div class="stat-row">
-          <div class="stat"><div class="stat-n" id="st-u">0</div><div class="stat-l">👥 Total Users</div></div>
+          <div class="stat"><div class="stat-n" id="st-u">0</div><div class="stat-l">👥 Users</div></div>
           <div class="stat"><div class="stat-n" id="st-c">0</div><div class="stat-l">📢 Complaints</div></div>
           <div class="stat"><div class="stat-n" id="st-f">0</div><div class="stat-l">🍲 Donations</div></div>
           <div class="stat"><div class="stat-n" id="st-p">0</div><div class="stat-l">🌾 Products</div></div>
         </div>
-        <div class="sec-lbl">📋 Complaint Status</div>
         <div class="stat-row">
           <div class="stat"><div class="stat-n" id="st-pend" style="color:#b45309">0</div><div class="stat-l">⏳ Pending</div></div>
           <div class="stat"><div class="stat-n" id="st-prog" style="color:#1d4ed8">0</div><div class="stat-l">🔧 In Progress</div></div>
           <div class="stat"><div class="stat-n" id="st-res" style="color:#15803d">0</div><div class="stat-l">✅ Resolved</div></div>
+          <div class="stat"><div class="stat-n" id="st-rate" style="color:#8b5cf6">0%</div><div class="stat-l">📈 Resolution Rate</div></div>
+        </div>
+        <!-- CHARTS -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="sec-lbl">📊 Complaints by Category</div>
+            <canvas id="cat-chart" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="sec-lbl">📅 Weekly Trend</div>
+            <canvas id="week-chart" height="200"></canvas>
+          </div>
         </div>
         <div class="sec-lbl">🕐 Recent Activity</div>
         <div id="a-activity"></div>
       </div>
-
+ 
       <!-- USERS -->
       <div id="at-users" class="atab">
         <div class="sec-lbl">👥 Registered Users</div>
-        <div style="overflow-x:auto">
-          <table class="atable">
-            <thead><tr><th>#</th><th>Citizen ID</th><th>Full Name</th><th>Mobile</th><th>Joined</th></tr></thead>
-            <tbody id="a-users"></tbody>
-          </table>
-        </div>
+        <div style="overflow-x:auto"><table class="atable">
+          <thead><tr><th>#</th><th>Citizen ID</th><th>Name</th><th>Mobile</th><th>Points</th><th>Badges</th><th>Joined</th></tr></thead>
+          <tbody id="a-users"></tbody>
+        </table></div>
       </div>
-
+ 
       <!-- COMPLAINTS -->
       <div id="at-complaints" class="atab">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
           <div class="sec-lbl" style="margin-bottom:0;flex:1">📢 All Complaints</div>
-          <select id="cf" onchange="renderAComp()" style="width:auto;padding:8px 14px;font-size:0.8rem;font-weight:600;border-radius:10px;border:1.5px solid var(--border2);background:#fff;">
+          <select id="cf" onchange="renderAComp()" style="padding:8px 12px;font-size:0.8rem;font-weight:600;border-radius:10px;border:1.5px solid var(--border2);background:var(--card);color:var(--text)">
             <option value="">All Status</option>
             <option value="pending">⏳ Pending</option>
             <option value="in-progress">🔧 In Progress</option>
             <option value="resolved">✅ Resolved</option>
           </select>
+          <select id="cpf" onchange="renderAComp()" style="padding:8px 12px;font-size:0.8rem;font-weight:600;border-radius:10px;border:1.5px solid var(--border2);background:var(--card);color:var(--text)">
+            <option value="">All Priority</option>
+            <option value="high">🔴 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
         </div>
         <div id="a-complaints"></div>
       </div>
-
+ 
       <!-- FOOD -->
       <div id="at-food" class="atab">
         <div class="sec-lbl">🍲 Food Donations</div>
         <div id="a-food"></div>
       </div>
-
+ 
       <!-- PRODUCTS -->
       <div id="at-products" class="atab">
         <div class="sec-lbl">🌾 Farmer Products</div>
         <div id="a-products" class="prod-grid"></div>
       </div>
-
+ 
+      <!-- LEADERBOARD -->
+      <div id="at-leaderboard" class="atab">
+        <div class="sec-lbl">🏆 Full Leaderboard</div>
+        <div id="a-leaderboard"></div>
+      </div>
+ 
     </div>
   </div>
 </div>
